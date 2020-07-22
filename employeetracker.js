@@ -1,4 +1,8 @@
+// dependencies
 var mysql = require("mysql");
+var inquire = require("inquirer");
+var cTable = require("console.table");
+const inquirer = require("inquirer");
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -11,36 +15,38 @@ var connection = mysql.createConnection({
 
     // Your password
     password: "password",
-    database: "biditems_db"
+    database: "employeeT_db"
 });
 
 connection.connect(function(err) {
     if (err) throw err;
-    console.log("connected as id " + connection.threadId + "\n");
-    afterConnection();
+    startEmpl();
 
 });
-
-function afterConnection() {
-    connection.query("SELECT * FROM coolstuff", function(err, res) {
-        if (err) throw err;
-        console.log(res);
-        createcsi();
-    });
-
-    function createcsi() {
-        console.log("instering a new item...\n");
-        var query = connection.query(
-            "insert into coolstuff items set ?", {
-                title: "shoes",
-                item_bid: "me",
-                item_highest_bid: "test1"
-            },
-            function(err, res) {
-                console.log(res.affectedRows + "im i there\n");
-                // updatesong();
+// Questions starts here
+function startEmpl() {
+    inquirer.prompt([{
+            type: "list",
+            name: "fQuestion",
+            message: "what would you like to do?",
+            choices: [
+                "view all employee",
+                "view all roles",
+                "view all departments",
+                "add employee",
+                "add department",
+                "add role",
+                "update employee role",
+                "remove employee"
+            ]
+        }]
+        .then(function(answer) {
+            console.log(answer);
+            switch (answer.fQuestions) {
+                case "view all employee":
+                    viewallempoyee()
+                    break;
             }
-        );
-        console.log(query.sql);
-    }
+        })
+    )
 }
