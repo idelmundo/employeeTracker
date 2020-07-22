@@ -20,14 +20,14 @@ var connection = mysql.createConnection({
 
 connection.connect(function(err) {
     if (err) throw err;
-    startEmpl();
+    runSearch();
 
 });
 // Questions starts here
-function startEmpl() {
+function runSearch() {
     inquirer.prompt({
             type: "rawlist",
-            name: "fQuestion",
+            name: "action",
             message: "what would you like to do?",
             choices: [
                 "view all employee",
@@ -42,15 +42,15 @@ function startEmpl() {
         })
         .then(function(answer) {
             console.log(answer);
-            switch (answer.fQuestions) {
+            switch (answer.action) {
                 case "view all employee":
-                    viewallempoyee()
+                    viewAllemployee()
                     break;
                 case "view all roles":
-                    viewallroles()
+                    viewAllroles()
                     break;
                 case "view all departments":
-                    viewalldepartments()
+                    viewAlldepartments()
                     break;
                 case "add employee":
                     addemployee()
@@ -59,7 +59,7 @@ function startEmpl() {
                     adddepartment()
                     break;
                 case "add role":
-                    addrole()
+                    roleAdd()
                     break;
                 case "update employee role":
                     updateemployeerole()
@@ -70,13 +70,126 @@ function startEmpl() {
             };
         });
 };
+//start linking database
 //view all employee
-function viewallempoyee() {
-    console.log("get employees from database");
-    const coolQuery = "SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department on role.department_id = department.id;";
-    connection.query(coolQuery, function(err, answer) {
-        console.log("\n Employees from Database \n");
-        console.table(answer);
-    });
-    startEmpl();
+function viewAllemployee() {
+    var query = "SELECT * FROM employee";
+    connection.query(query, function(err, res) {
+        if (err) throw err;
+        console.log(res.length + " found you");
+        console.table('All Employees:', res);
+        runSearch();
+    })
+}
+// view all roles
+function viewAllroles() {
+    var query = "SELECT * FROM empl_role";
+    connection.query(query, function(err, res) {
+        if (err) throw err;
+        console.log(res.length + " found you");
+        console.table('All empl role:', res);
+        runSearch();
+    })
+}
+// view all department 
+function viewAlldepartments() {
+    var query = "SELECT * FROM department";
+    connection.query(query, function(err, res) {
+        if (err) throw err;
+        console.log(res.length + " found you");
+        console.table('All empl role:', res);
+        runSearch();
+    })
+}
+//add empl
+function addemployee() {
+    inquirer
+        .prompt({
+            name: "addemployee",
+            type: "input",
+            messages: ["To ADD an employee, enter first then last name"]
+        })
+        .then(function(answer) {
+            console.log(answer)
+            var str = answer.addemployee;
+            var firstAndLastName = str.split(" ");
+            console.log(firstAndLastName);
+            var query = "INSERT INTO employee (first_name, last_name) VALUES ?";
+            connection.query(query, [
+                [firstAndLastName]
+            ], function(err, res) {
+                runSearch();
+            });
+        })
+}
+
+function adddepartment() {
+    inquirer
+        .prompt({
+            name: "adddepartment",
+            type: "input",
+            message: ["To ADD a department, enter new department name"]
+        })
+
+    .then(function(answer) {
+        console.log(answer)
+        var str = answer.addemployee;
+        var firstAndLastName = str.split(" ");
+        console.log(firstAndLastName);
+        var query = "INSERT INTO employee (first_name, last_name) VALUES ?";
+        connection.query(query, [
+            [firstAndLastName]
+        ], function(err, res) {
+
+            runSearch();
+        });
+    })
+}
+
+function roleAdd() {
+    inquirer
+        .prompt({
+            name: "title",
+            type: "input",
+            message: ["Enter new role name"]
+        })
+        .then(function(answer) {
+            var title = answer.title;
+
+            inquirer
+                .prompt({
+                    name: "salary",
+                    type: "input",
+                    message: ["Enter new role salary"]
+                })
+                .then(function(answer) {
+                    var salary = answer.salary;
+
+                    inquirer
+                        .prompt({
+                            name: "department_id",
+                            type: "input",
+                            message: ["Enter new role department id"]
+                        })
+                        .then(function(answer) {
+                            var department_id = answer.department_id;
+
+                            console.log(`title: ${title} salary: ${salary} department id: ${department_id}`);
+
+                            var query = "INSERT INTO empl_role (title, salary, department_id) VALUES ?";
+                            connection.query(query, [
+                                [
+                                    [title, salary, department_id]
+                                ]
+                            ], function(err, res) {
+                                if (err) {
+                                    console.log(err);
+                                }
+
+                                runSearch();
+                            });
+                        })
+                })
+        })
+
 }
